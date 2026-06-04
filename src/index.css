@@ -1,0 +1,19 @@
+html {
+  font-family: 'Sarabun', system-ui, sans-serif;
+  background: #08070b;
+}
+
+body,
+#root {
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
