@@ -628,6 +628,7 @@ select {
   display: grid;
   place-items: center;
   padding: 1.25rem;
+  overflow: hidden;
 }
 
 .image-viewer__backdrop {
@@ -641,6 +642,7 @@ select {
   position: relative;
   z-index: 1;
   width: 100%;
+  max-height: min(88vh, 920px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.5rem;
   background:
@@ -650,6 +652,9 @@ select {
     0 28px 70px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .theme-light .image-viewer__panel {
@@ -684,10 +689,13 @@ select {
 .image-viewer__stage {
   display: grid;
   place-items: center;
-  min-height: 60vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(88vh - 8rem);
   overflow: hidden;
   cursor: grab;
   touch-action: none;
+  padding: 1rem;
 }
 
 .image-viewer__stage:active {
@@ -696,10 +704,12 @@ select {
 
 .image-viewer__image {
   max-width: none;
-  width: min(780px, 92vw);
+  width: min(780px, 100%);
+  max-height: 100%;
   user-select: none;
   pointer-events: none;
   transform-origin: center center;
+  object-fit: contain;
 }
 
 .image-viewer__controls input {
@@ -840,6 +850,8 @@ select {
 .glow-frame--viewer {
   width: min(980px, 100%);
   border-radius: 1.5rem;
+  max-height: 88vh;
+  overflow: hidden;
 }
 
 .glow-frame--wide,
