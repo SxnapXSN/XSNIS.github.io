@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 
 import heroImg from './assets/profile-default.jpg'
 import './App.css'
@@ -522,11 +522,58 @@ function ImageViewerModal({
   onClose,
   glowColor,
 }: ImageViewerModalProps) {
+  const stageRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null)
+  const [imageSize, setImageSize] = useState({ width: 1, height: 1 })
 
   const clampZoom = (value: number) => Math.min(3, Math.max(1, value))
 
+  const clampPan = useCallback(
+    (nextPan: { x: number; y: number }, nextZoom: number) => {
+      if (nextZoom <= 1) {
+        return { x: 0, y: 0 }
+      }
+
+      const stage = stageRef.current
+      if (!stage || !imageSize.width || !imageSize.height) {
+        return nextPan
+      }
+
+      const rect = stage.getBoundingClientRect()
+      const fittedScale = Math.min(rect.width / imageSize.width, rect.height / imageSize.height)
+      const baseWidth = imageSize.width * fittedScale
+      const baseHeight = imageSize.height * fittedScale
+      const scaledWidth = baseWidth * nextZoom
+      const scaledHeight = baseHeight * nextZoom
+      const maxX = Math.max(0, (scaledWidth - rect.width) / 2)
+      const maxY = Math.max(0, (scaledHeight - rect.height) / 2)
+
+      return {
+        x: Math.min(maxX, Math.max(-maxX, nextPan.x)),
+        y: Math.min(maxY, Math.max(-maxY, nextPan.y)),
+      }
+    },
+    [imageSize.height, imageSize.width],
+  )
+
+  useEffect(() => {
+    const nextPan = clampPan(pan, zoom)
+    if (nextPan.x !== pan.x || nextPan.y !== pan.y) {
+      onPanChange(nextPan)
+    }
+  }, [clampPan, onPanChange, pan, zoom])
+
+  const handleZoomChange = (nextZoom: number) => {
+    const clampedZoom = clampZoom(nextZoom)
+    onZoomChange(clampedZoom)
+    onPanChange(clampPan(pan, clampedZoom))
+  }
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (zoom <= 1) {
+      return
+    }
+
     dragRef.current = {
       x: event.clientX,
       y: event.clientY,
@@ -541,21 +588,28 @@ function ImageViewerModal({
       return
     }
 
-    onPanChange({
-      x: dragRef.current.panX + (event.clientX - dragRef.current.x),
-      y: dragRef.current.panY + (event.clientY - dragRef.current.y),
-    })
+    onPanChange(
+      clampPan(
+        {
+          x: dragRef.current.panX + (event.clientX - dragRef.current.x),
+          y: dragRef.current.panY + (event.clientY - dragRef.current.y),
+        },
+        zoom,
+      ),
+    )
   }
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
     dragRef.current = null
-    event.currentTarget.releasePointerCapture(event.pointerId)
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
   }
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
     const delta = event.deltaY > 0 ? -0.12 : 0.12
-    onZoomChange(clampZoom(zoom + delta))
+    handleZoomChange(zoom + delta)
   }
 
   return (
@@ -577,7 +631,8 @@ function ImageViewerModal({
           </div>
 
           <div
-            className="image-viewer__stage"
+            ref={stageRef}
+            className={`image-viewer__stage ${zoom > 1 ? 'image-viewer__stage--draggable' : ''}`}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -588,6 +643,12 @@ function ImageViewerModal({
               src={src}
               alt="Zoom preview"
               className="image-viewer__image"
+              onLoad={(event) =>
+                setImageSize({
+                  width: event.currentTarget.naturalWidth || 1,
+                  height: event.currentTarget.naturalHeight || 1,
+                })
+              }
               style={{
                 transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               }}
@@ -602,14 +663,13 @@ function ImageViewerModal({
               max="3"
               step="0.05"
               value={zoom}
-              onChange={(event) => onZoomChange(Number(event.target.value))}
+              onChange={(event) => handleZoomChange(Number(event.target.value))}
             />
             <button
               type="button"
               className="image-viewer__reset"
               onClick={() => {
-                onZoomChange(1)
-                onPanChange({ x: 0, y: 0 })
+                handleZoomChange(1)
               }}
             >
               รีเซ็ต

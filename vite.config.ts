@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/XSNIS.github.io/',
+  base: process.env.NODE_ENV === 'production' ? '/XSNIS.github.io/' : '/',
   plugins: [react()],
 })

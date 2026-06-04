@@ -693,23 +693,28 @@ select {
   min-height: 0;
   max-height: calc(88vh - 8rem);
   overflow: hidden;
-  cursor: grab;
+  cursor: default;
   touch-action: none;
-  padding: 1rem;
+  padding: 1.35rem;
 }
 
-.image-viewer__stage:active {
+.image-viewer__stage--draggable {
+  cursor: grab;
+}
+
+.image-viewer__stage--draggable:active {
   cursor: grabbing;
 }
 
 .image-viewer__image {
-  max-width: none;
-  width: min(780px, 100%);
-  max-height: 100%;
+  width: auto;
+  max-width: min(620px, 72vw);
+  max-height: min(52vh, 520px);
   user-select: none;
   pointer-events: none;
   transform-origin: center center;
   object-fit: contain;
+  will-change: transform;
 }
 
 .image-viewer__controls input {
