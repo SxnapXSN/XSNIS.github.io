@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type CSSProperties } from 'react'
 
-import heroImg from './assets/hero.png'
+import heroImg from './assets/profile-default.jpg'
 import './App.css'
 import BorderGlow from './components/BorderGlow'
 import LogoLoop from './components/LogoLoop'
@@ -48,8 +48,8 @@ const LOGO_ITEMS = [
   { label: 'Portfolio Card', accent: '#ffd36f' },
 ]
 
-const STORAGE_KEY = 'hp-shared-profile-image'
-const STORAGE_MODE_KEY = 'hp-shared-profile-image-mode'
+const STORAGE_KEY = 'hp-shared-profile-image-v2'
+const STORAGE_MODE_KEY = 'hp-shared-profile-image-mode-v2'
 
 type SurfaceThemeId = keyof typeof SURFACE_THEMES
 type ImageMode = 'upload' | 'url'
