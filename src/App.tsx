@@ -50,6 +50,7 @@ const LOGO_ITEMS = [
 
 const STORAGE_KEY = 'hp-shared-profile-image-v2'
 const STORAGE_MODE_KEY = 'hp-shared-profile-image-mode-v2'
+const DEFAULT_VIEWER_ZOOM = 0.72
 
 type SurfaceThemeId = keyof typeof SURFACE_THEMES
 type ImageMode = 'upload' | 'url'
@@ -170,7 +171,7 @@ function App() {
   }
 
   const handleOpenViewer = () => {
-    setImageZoom(1)
+    setImageZoom(DEFAULT_VIEWER_ZOOM)
     setImagePan({ x: 0, y: 0 })
     setImageViewerOpen(true)
   }
@@ -526,7 +527,7 @@ function ImageViewerModal({
   const dragRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null)
   const [imageSize, setImageSize] = useState({ width: 1, height: 1 })
 
-  const clampZoom = (value: number) => Math.min(3, Math.max(1, value))
+  const clampZoom = (value: number) => Math.min(20, Math.max(0.05, value))
 
   const clampPan = useCallback(
     (nextPan: { x: number; y: number }, nextZoom: number) => {
@@ -659,8 +660,8 @@ function ImageViewerModal({
             <span>ซูม</span>
             <input
               type="range"
-              min="1"
-              max="3"
+              min="0.05"
+              max="20"
               step="0.05"
               value={zoom}
               onChange={(event) => handleZoomChange(Number(event.target.value))}
@@ -669,7 +670,7 @@ function ImageViewerModal({
               type="button"
               className="image-viewer__reset"
               onClick={() => {
-                handleZoomChange(1)
+                handleZoomChange(DEFAULT_VIEWER_ZOOM)
               }}
             >
               รีเซ็ต
